@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ali's V-Bucks Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-deep: #0a1628;
+    --blue-mid: #0d2347;
+    --blue-bright: #1a6bff;
+    --blue-glow: #3d8bff;
+    --orange: #ff8c00;
+    --orange-bright: #ffad33;
+    --orange-glow: rgba(255, 140, 0, 0.4);
+    --white: #ffffff;
+    --text-muted: #8faac8;
+    --card-bg: rgba(13, 35, 71, 0.8);
+    --card-border: rgba(26, 107, 255, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--blue-deep);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(26, 107, 255, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 140, 0, 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 60% at 50% 50%, rgba(10, 22, 40, 0.8) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Floating particles */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: slideDown 0.8s ease-out;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--orange), var(--orange-bright));
+    color: var(--blue-deep);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(42px, 8vw, 72px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+  }
+  h1 .line1 { color: var(--white); display: block; }
+  h1 .line2 {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--orange);
+    display: block;
+  }
+  h1 .arrow {
+    color: var(--blue-glow);
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Main converter card */
+  .converter-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 36px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(26,107,255,0.1) inset;
+    animation: fadeUp 0.8s ease-out 0.2s both;
+    margin-bottom: 24px;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .input-group {
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  label .dot {
+    width: 6px; height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-icon {
+    position: absolute;
+    left: 16px;
+    font-size: 22px;
+    pointer-events: none;
+    user-select: none;
+  }
+  input[type="number"] {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(26,107,255,0.4);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    padding: 14px 16px 14px 52px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus {
+    border-color: var(--blue-bright);
+    background: rgba(26,107,255,0.08);
+    box-shadow: 0 0 0 4px rgba(26,107,255,0.15);
+  }
+  input[type="number"]::placeholder { color: rgba(255,255,255,0.2); }
+
+  /* Result display */
+  .result-box {
+    background: linear-gradient(135deg, rgba(255,140,0,0.12), rgba(255,140,0,0.05));
+    border: 1.5px solid rgba(255,140,0,0.4);
+    border-radius: 10px;
+    padding: 20px 20px 20px 52px;
+    position: relative;
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+  }
+  .result-box .input-icon { color: var(--orange); }
+  .result-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    color: var(--orange-bright);
+    transition: all 0.3s;
+  }
+  .result-value.flash {
+    animation: flash 0.3s ease-out;
+  }
+  @keyframes flash {
+    0% { transform: scale(1.08); color: #fff; }
+    100% { transform: scale(1); }
+  }
+
+  /* Rate info */
+  .rate-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(26,107,255,0.15);
+    border: 1px solid rgba(26,107,255,0.3);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--blue-glow);
+    margin-top: 14px;
+    font-weight: 600;
+  }
+
+  /* Quick packs */
+  .packs-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: fadeUp 0.8s ease-out 0.4s both;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(26,107,255,0.3), transparent);
+  }
+
+  .packs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .pack-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(26,107,255,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    color: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pack-btn:hover {
+    border-color: var(--orange);
+    background: rgba(255,140,0,0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,140,0,0.15);
+  }
+  .pack-btn:active { transform: translateY(0); }
+  .pack-vbucks {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .pack-vbucks small {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    display: block;
+    margin-top: 1px;
+  }
+  .pack-gbp {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--orange-bright);
+  }
+
+  /* Cost per V-Buck bar */
+  .efficiency-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: fadeUp 0.8s ease-out 0.6s both;
+  }
+
+  .efficiency-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .efficiency-row:last-child { margin-bottom: 0; }
+  .eff-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    width: 100px;
+    flex-shrink: 0;
+  }
+  .eff-bar-wrap {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .eff-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(to right, var(--blue-bright), var(--orange));
+    transition: width 0.6s ease-out;
+  }
+  .eff-rate {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--orange-bright);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .best-badge {
+    font-size: 10px;
+    background: var(--orange);
+    color: var(--blue-deep);
+    font-weight: 900;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    color: rgba(143,170,200,0.5);
+    font-size: 12px;
+    animation: fadeUp 0.8s ease-out 0.8s both;
+  }
+  footer a { color: var(--blue-glow); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo-badge">⚡ Official Rates · Updated March 2026</div>
+    <h1>
+      <span class="line1">Ali's V-Bucks</span>
+      <span class="arrow">↓</span>
+      <span class="line2">Converter</span>
+    </h1>
+    <p class="subtitle">Enter any amount of V-Bucks to see the real-money value in British Pounds</p>
+  </header>
+
+  <!-- Main Converter -->
+  <div class="converter-card">
+    <div class="input-group">
+      <label><span class="dot"></span> V-Bucks Amount</label>
+      <div class="input-wrapper">
+        <span class="input-icon">🎮</span>
+        <input type="number" id="vbucks-input" placeholder="1000" min="0" />
+      </div>
+    </div>
+
+    <div class="input-group" style="margin-bottom:0">
+      <label><span class="dot" style="background:var(--orange)"></span> British Pounds (£)</label>
+      <div class="result-box">
+        <span class="input-icon">💷</span>
+        <span class="result-value" id="gbp-result">£0.00</span>
+      </div>
+    </div>
+
+    <div class="rate-tag">
+      ℹ️ &nbsp;Based on 1,000 V-Bucks = £6.99 (Epic Games UK pricing, March 2026)
+    </div>
+  </div>
+
+  <!-- Quick Pack Buttons -->
+  <div class="packs-section">
+    <p class="section-title">Official V-Buck Packs</p>
+    <div class="packs-grid">
+      <button class="pack-btn" onclick="setVBucks(1000)">
+        <span class="pack-vbucks">1,000 <small>V-Bucks</small></span>
+        <span class="pack-gbp">£6.99</span>
+      </button>
+      <button class="pack-btn" onclick="setVBucks(2800)">
+        <span class="pack-vbucks">2,800 <small>V-Bucks</small></span>
+        <span class="pack-gbp">£17.49</span>
+      </button>
+      <button class="pack-btn" onclick="setVBucks(5000)">
+        <span class="pack-vbucks">5,000 <small>V-Bucks</small></span>
+        <span class="pack-gbp">£27.99</span>
+      </button>
+      <button class="pack-btn" onclick="setVBucks(13500)">
+        <span class="pack-vbucks">13,500 <small>V-Bucks</small></span>
+        <span class="pack-gbp">£69.99</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Value Efficiency -->
+  <div class="efficiency-section">
+    <p class="section-title">Value per 100 V-Bucks</p>
+
+    <div class="efficiency-row">
+      <span class="eff-label">1,000</span>
+      <div class="eff-bar-wrap"><div class="eff-bar" style="width:72%"></div></div>
+      <span class="eff-rate">£0.699</span>
+    </div>
+    <div class="efficiency-row">
+      <span class="eff-label">2,800</span>
+      <div class="eff-bar-wrap"><div class="eff-bar" style="width:84%"></div></div>
+      <span class="eff-rate">£0.625</span>
+    </div>
+    <div class="efficiency-row">
+      <span class="eff-label">5,000</span>
+      <div class="eff-bar-wrap"><div class="eff-bar" style="width:92%"></div></div>
+      <span class="eff-rate">£0.560</span>
+    </div>
+    <div class="efficiency-row">
+      <span class="eff-label">13,500</span>
+      <div class="eff-bar-wrap"><div class="eff-bar" style="width:100%"></div></div>
+      <span class="eff-rate">£0.519 &nbsp;<span class="best-badge">Best</span></span>
+    </div>
+  </div>
+
+  <footer>
+    <p>Prices based on Epic Games UK store · Not affiliated with Epic Games or Fortnite</p>
+    <p style="margin-top:6px">V-Bucks are a virtual currency with no real-world cash value</p>
+  </footer>
+</div>
+
+<script>
+  // Rate: £6.99 per 1000 V-Bucks
+  const RATE = 6.99 / 1000;
+
+  const input = document.getElementById('vbucks-input');
+  const result = document.getElementById('gbp-result');
+
+  function convert(val) {
+    const vb = parseFloat(val);
+    if (isNaN(vb) || vb < 0) {
+      result.textContent = '£0.00';
+      return;
+    }
+    const gbp = (vb * RATE).toFixed(2);
+    result.textContent = '£' + parseFloat(gbp).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    result.classList.remove('flash');
+    void result.offsetWidth;
+    result.classList.add('flash');
+  }
+
+  input.addEventListener('input', () => convert(input.value));
+
+  function setVBucks(amount) {
+    input.value = amount;
+    convert(amount);
+    input.focus();
+  }
+
+  // Particles
+  function createParticles() {
+    const container = document.getElementById('particles');
+    const colors = ['#1a6bff', '#3d8bff', '#ff8c00', '#ffad33'];
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 4 + 2;
+      p.style.cssText = `
+        width: ${size}px; height: ${size}px;
+        left: ${Math.random() * 100}%;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${Math.random() * 15 + 10}s;
+        animation-delay: ${Math.random() * 10}s;
+      `;
+      container.appendChild(p);
+    }
+  }
+  createParticles();
+</script>
+</body>
+</html>
