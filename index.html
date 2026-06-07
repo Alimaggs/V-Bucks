@@ -11,15 +11,16 @@
     --blue-mid: #0d2347;
     --blue-bright: #1a6bff;
     --blue-glow: #3d8bff;
-    --orange: #ff8c00;
-    --orange-bright: #ffad33;
-    --orange-glow: rgba(255, 140, 0, 0.4);
+    --orange: #FF6A00;
+    --orange-bright: #FFD200;
+    --orange-glow: rgba(255, 106, 0, 0.4);
     --white: #ffffff;
     --text-muted: #8faac8;
     --card-bg: rgba(13, 35, 71, 0.8);
     --card-border: rgba(26, 107, 255, 0.3);
   }
 
+  html { scroll-behavior: smooth; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -73,11 +74,34 @@
     padding: 40px 20px 60px;
   }
 
+  /* Navbar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--orange), var(--orange-bright));
+    color: var(--blue-deep);
+    box-shadow: 0 6px 20px rgba(255,106,0,0.08);
+    margin-bottom: 18px;
+  }
+  .navbar .nav-left { font-weight: 900; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+  .navbar .nav-right { display: flex; gap: 12px; align-items: center; }
+. nav-link { color: var(--blue-deep); text-decoration: none; font-weight: 700; padding: 8px 12px; border-radius: 6px; transition: background 0.15s, transform 0.08s; }
+  .nav-link:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+  .nav-cta { background: var(--blue-bright); color: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 6px 20px rgba(26,107,255,0.12); }
+
   /* Header */
   .header {
     text-align: center;
     margin-bottom: 48px;
     animation: slideDown 0.8s ease-out;
+    padding: 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,106,0,0.10), rgba(255,210,0,0.06));
+    box-shadow: 0 8px 30px rgba(255,106,0,0.06);
   }
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-30px); }
@@ -385,11 +409,14 @@
   footer {
     text-align: center;
     margin-top: 40px;
-    color: rgba(143,170,200,0.5);
+    color: rgba(255,210,0,0.95);
     font-size: 12px;
     animation: fadeUp 0.8s ease-out 0.8s both;
+    background: linear-gradient(90deg, rgba(255,106,0,0.06), rgba(255,210,0,0.04));
+    padding: 12px;
+    border-radius: 8px;
   }
-  footer a { color: var(--blue-glow); text-decoration: none; }
+  footer a { color: var(--orange-bright); text-decoration: none; }
 </style>
 </head>
 <body>
@@ -397,6 +424,14 @@
 <div class="particles" id="particles"></div>
 
 <div class="container">
+  <nav class="navbar">
+    <div class="nav-left">Ali's V-Bucks</div>
+    <div class="nav-right">
+      <a class="nav-link" href="#">Home</a>
+      <a class="nav-link" href="#packs">Packs</a>
+      <a class="nav-link nav-cta" href="#vbucks-input">Convert</a>
+    </div>
+  </nav>
   <header class="header">
     <div class="logo-badge">⚡ Official Rates · Updated March 2026</div>
     <h1>
@@ -515,7 +550,7 @@
   // Particles
   function createParticles() {
     const container = document.getElementById('particles');
-    const colors = ['#1a6bff', '#3d8bff', '#ff8c00', '#ffad33'];
+    const colors = ['#1a6bff', '#3d8bff', '#FF6A00', '#FFD200'];
     for (let i = 0; i < 20; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
@@ -531,6 +566,18 @@
     }
   }
   createParticles();
+
+  // Centering scroll and focus for Convert CTA
+  document.querySelectorAll('a[href="#vbucks-input"]').forEach(a => {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      const el = document.querySelector(this.getAttribute('href'));
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      // focus after a short delay so keyboard opens on mobile after scroll
+      setTimeout(() => { el.focus({ preventScroll: true }); }, 600);
+    });
+  });
 </script>
 </body>
 </html>
